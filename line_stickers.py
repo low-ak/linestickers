@@ -31,4 +31,4 @@ for sticker in stickers:
     img_url = urlm.search(sticker['style']).group(1)
     name = namem.search(img_url).group(1)
     filename = tar_dir+'/'+name+pathlib.Path(img_url).suffix
-    os.system('curl -o '+filename+' '+img_url)
+    os.system('curl -o "'+filename+'" '+img_url)

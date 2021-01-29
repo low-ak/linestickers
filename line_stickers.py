@@ -7,6 +7,7 @@ import re
 import bs4
 import pathlib
 import json
+import datetime
 
 if(len(sys.argv) < 2):
     print ('No argument, usage "./line_stickers.py [url]"')
@@ -30,8 +31,18 @@ if len(stickers) == 0:
 if not os.path.exists(tar_dir):
     os.makedirs(tar_dir)
 
+metadata = {}
+metadata['url'] = url
+metadata['title'] = title
+metadata['author'] = main.find('a', {'class': 'mdCMN38Item01Author'}).text
+metadata['description'] = main.find('p', {'class': 'mdCMN38Item01Txt'}).text
+metadata['download_date'] = datetime.date.today().strftime("%Y-%M-%d")
+metadata['stickers'] = []
+
 for sticker in stickers:
     info = json.loads(sticker['data-preview'])
+
+    metadata['stickers'].append(info)
 
     dl = []
 
@@ -43,11 +54,13 @@ for sticker in stickers:
         dl.append(info['animationUrl'])
         dl.append(info['soundUrl'])
 
-    for url in dl:
-        suffix = pathlib.Path(url).suffix.removesuffix(";compress=true")
+    for dl_url in dl:
+        suffix = pathlib.Path(dl_url).suffix.removesuffix(";compress=true")
         filename = tar_dir+'/'+info['id']+suffix
         
-        img = requests.get(url)
+        img = requests.get(dl_url)
         open(filename, 'wb').write(img.content)
     
     print("Downloaded sticker " + info['id'])
+
+open(tar_dir+'/metadata.json', 'w').write(json.dumps(metadata))

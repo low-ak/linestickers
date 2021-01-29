@@ -6,6 +6,7 @@ import requests
 import re
 import bs4
 import pathlib
+import json
 
 if(len(sys.argv) < 2):
     print ('No argument, usage "./line_stickers.py [url]"')
@@ -16,19 +17,37 @@ url = sys.argv[1]
 main = bs4.BeautifulSoup(requests.get(url).content, 'html.parser')
 
 title = main.find('p', {'class': 'mdCMN38Item01Ttl'}).text
-tar_dir = 'stickers_' + '_'.join(title.split())
+tar_dir = 'stickers/' + '_'.join(title.split())
 
 print('Downloading "'+title+'" to', tar_dir)
+
+stickers = main.findAll('li', {'class', 'mdCMN09Li'})
+
+if len(stickers) == 0:
+    print("No sticker urls found")
+    exit(0)
 
 if not os.path.exists(tar_dir):
     os.makedirs(tar_dir)
 
-stickers = main.findAll('span', {'class', 'mdCMN09Image'})
-
-urlm = re.compile(r'background-image:url\((.*);compress=true\)')
-namem = re.compile(r'.*sticker/([0-9]*).*')
 for sticker in stickers:
-    img_url = urlm.search(sticker['style']).group(1)
-    name = namem.search(img_url).group(1)
-    filename = tar_dir+'/'+name+pathlib.Path(img_url).suffix
-    os.system('curl -o "'+filename+'" '+img_url)
+    info = json.loads(sticker['data-preview'])
+
+    dl = []
+
+    if info['type'] == "static":
+        dl.append(info['staticUrl'])
+    elif info['type'] == "animation":
+        dl.append(info['animationUrl'])
+    elif info['type'] == "animation_sound":
+        dl.append(info['animationUrl'])
+        dl.append(info['soundUrl'])
+
+    for url in dl:
+        suffix = pathlib.Path(url).suffix.removesuffix(";compress=true")
+        filename = tar_dir+'/'+info['id']+suffix
+        
+        img = requests.get(url)
+        open(filename, 'wb').write(img.content)
+    
+    print("Downloaded sticker " + info['id'])

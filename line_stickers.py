@@ -36,7 +36,7 @@ metadata['url'] = url
 metadata['title'] = title
 metadata['author'] = main.find('a', {'class': 'mdCMN38Item01Author'}).text
 metadata['description'] = main.find('p', {'class': 'mdCMN38Item01Txt'}).text
-metadata['download_date'] = datetime.date.today().strftime("%Y-%M-%d")
+metadata['download_date'] = datetime.date.today().strftime("%Y-%m-%d")
 metadata['stickers'] = []
 
 for sticker in stickers:

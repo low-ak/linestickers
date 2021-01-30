@@ -8,6 +8,11 @@ import bs4
 import pathlib
 import json
 import datetime
+import string
+
+def sanitize(filename):
+    allowed = f"-_.() %s%s" % (string.ascii_letters, string.digits)
+    return ''.join(c for c in filename if c in allowed)
 
 if(len(sys.argv) < 2):
     print ('No argument, usage "./line_stickers.py [url]"')
@@ -18,7 +23,7 @@ url = sys.argv[1]
 main = bs4.BeautifulSoup(requests.get(url).content, 'html.parser')
 
 title = main.find('p', {'class': 'mdCMN38Item01Ttl'}).text
-tar_dir = 'stickers/' + '_'.join(title.split())
+tar_dir = 'stickers/' + sanitize(title)
 
 print('Downloading "'+title+'" to', tar_dir)
 

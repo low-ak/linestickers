@@ -58,6 +58,8 @@ for sticker in stickers:
     elif info['type'] == "animation_sound":
         dl.append(info['animationUrl'])
         dl.append(info['soundUrl'])
+    elif info['type'] == "popup":
+        dl.append(info['popupUrl'])
 
     for dl_url in dl:
         suffix = pathlib.Path(dl_url).suffix.removesuffix(";compress=true")
